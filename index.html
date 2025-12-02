@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema TCC - Versão 6.0 Web</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h2, h3 { color: var(--primary-color); margin-top: 0; }
+
+        /* Utilitários */
+        .hidden { display: none !important; }
+
+        /* Botões */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s, transform 0.1s;
+            font-weight: 600;
+        }
+        button:active { transform: scale(0.98); }
+
+        .btn-primary { background-color: var(--secondary-color); color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+
+        .btn-danger { background-color: var(--accent-color); color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-success:hover { background-color: #219150; }
+
+        /* Formulários */
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        /* Abas */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-btn {
+            padding: 12px 25px;
+            background: #f8f9fa;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            color: #666;
+        }
+        .tab-btn:hover { background: #e9ecef; }
+        .tab-btn.active {
+            background: white;
+            border-color: #ddd;
+            border-bottom-color: white;
+            color: var(--secondary-color);
+            font-weight: bold;
+            margin-bottom: -1px;
+        }
+
+        /* Cards de Informação */
+        .card {
+            border: 1px solid #eee;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            background: #95a5a6;
+        }
+        /* Cores de Status */
+        .status-PROPOSTA { background: #f39c12; }
+        .status-EM_ANDAMENTO { background: #3498db; }
+        .status-AGUARDANDO_BANCA { background: #9b59b6; }
+        .status-FINALIZADO { background: #27ae60; }
+        .status-CANCELADO { background: #c0392b; }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .grade-box {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--success-color);
+            margin-top: 10px;
+            text-align: center;
+            border: 2px dashed var(--success-color);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Documentação Técnica */
+        #tech-docs {
+            margin-top: 40px;
+            padding: 20px;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            border: 1px solid #444;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .doc-toggle {
+            cursor: pointer;
+            color: var(--secondary-color);
+            text-decoration: underline;
+            font-size: 14px;
+            text-align: center;
+            display: block;
+            margin-top: 30px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-view" class="container">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: var(--primary-color);">Sistema de TCC</h1>
+        <p>Gestão Acadêmica Integrada (Versão 6.0 Web)</p>
+    </div>
+
+    <div class="card" style="max-width: 400px; margin: 0 auto;">
+        <h3>Acesso ao Sistema</h3>
+        <p style="font-size: 0.9em; color: #666;">Credenciais de Teste:<br>Aluno: <strong>2025001</strong> | Prof: <strong>111222</strong><br>Senha: <strong>123</strong></p>
+
+        <label>ID (Matrícula/CPF):</label>
+        <input type="text" id="loginId" placeholder="Digite seu ID">
+
+        <label>Senha:</label>
+        <input type="password" id="loginPass" placeholder="Digite sua senha">
+
+        <button id="btnLogin" class="btn-primary" style="width: 100%;">Entrar</button>
+    </div>
+</div>
+
+<!-- TELA PRINCIPAL (DASHBOARD) -->
+<div id="main-view" class="container hidden">
+    <div class="header">
+        <div>
+            <h2 id="welcome-msg" style="margin:0;">Bem-vindo</h2>
+            <small id="user-role" style="color: #7f8c8d;">Papel do Usuário</small>
+        </div>
+        <button id="btnLogout" class="btn-danger">Sair</button>
+    </div>
+
+    <!-- PAINEL DO ALUNO -->
+    <div id="aluno-panel" class="hidden">
+        <!-- Estado 1: Sem TCC (Formulário) -->
+        <div id="aluno-no-tcc" class="hidden">
+            <div class="card">
+                <h3>Submeter Proposta de TCC</h3>
+                <p>Você ainda não possui um tema registrado. Preencha o formulário abaixo para iniciar.</p>
+
+                <label>Título do Trabalho:</label>
+                <input type="text" id="tccTitulo" placeholder="Ex: Desenvolvimento de Sistema Web...">
+
+                <label>Descrição e Objetivos:</label>
+                <textarea id="tccDesc" rows="5" placeholder="Descreva o escopo do seu trabalho..."></textarea>
+
+                <button id="btnProporTcc" class="btn-success">Enviar Proposta</button>
+            </div>
+        </div>
+
+        <!-- Estado 2: Com TCC (Visualização) -->
+        <div id="aluno-tcc-info" class="hidden">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items: flex-start;">
+                    <h3 id="viewTitulo" style="margin:0;">Título do TCC</h3>
+                    <span id="viewStatus" class="status-badge">STATUS</span>
+                </div>
+
+                <p style="margin-top: 5px; color: #666;"><strong>Orientador:</strong> <span id="viewOrientador">Nome do Professor</span></p>
+
+                <div class="info-box">
+                    <strong>Resumo:</strong>
+                    <p id="viewDesc" style="margin-bottom: 0;">Descrição do TCC...</p>
+                </div>
+
+                <div class="info-box">
+                    <h4>Histórico de Orientações</h4>
+                    <ul id="viewOrientacoes" style="padding-left: 20px;">
+                        <!-- Lista preenchida via JS -->
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h4>Banca e Avaliação Final</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><strong>Data da Banca:</strong> <span id="viewDataBanca">-</span></div>
+                        <div><strong>Membros:</strong> <span id="viewMembros">-</span></div>
+                    </div>
+
+                    <!-- Resultado Final (Visível apenas se finalizado) -->
+                    <div id="viewResultadoFinal" class="hidden" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+                        <div class="grade-box">
+                            Nota Final: <span id="viewNota"></span>
+                        </div>
+                        <p style="text-align: center; margin-top: 5px;"><strong>Parecer da Banca:</strong> <span id="viewParecer"></span></p>
+
+                        <!-- BOTÃO DE DOWNLOAD ATA (ALUNO) -->
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button id="btnBaixarAtaAluno" class="btn-primary">📄 Baixar ATA de Defesa (PDF)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL DO PROFESSOR -->
+    <div id="prof-panel" class="hidden">
+        <!-- Navegação por Abas -->
+        <div class="tabs">
+            <button id="tab-btn-propostas" class="tab-btn active">Novas Propostas</button>
+            <button id="tab-btn-orientacao" class="tab-btn">Orientações</button>
+            <button id="tab-btn-banca" class="tab-btn">Definir Banca</button>
+            <button id="tab-btn-finalizar" class="tab-btn">Finalizar/Avaliar</button>
+        </div>
+
+        <!-- Aba 1: Escolher Temas -->
+        <div id="tab-propostas">
+            <h3>Propostas Aguardando Orientador</h3>
+            <p style="font-size: 0.9em; color: #666;">Selecione os temas que deseja orientar.</p>
+            <div id="list-propostas">
+                <!-- Lista preenchida via JS -->
+            </div>
+        </div>
+
+        <!-- Aba 2: Registrar Orientação -->
+        <div id="tab-orientacao" class="hidden">
+            <h3>Registrar Sessão de Orientação</h3>
+            <div class="card">
+                <label>Selecione o TCC (Em Andamento):</label>
+                <select id="sel-orientacao-tcc"></select>
+
+                <label>Data da Orientação:</label>
+                <input type="date" id="date-orientacao">
+
+                <label>Descrição / Progresso:</label>
+                <textarea id="txt-orientacao" rows="4" placeholder="Descreva o que foi discutido..."></textarea>
+
+                <button id="btnRegistrarOrientacao" class="btn-success">Salvar Registro</button>
+            </div>
+        </div>
+
+        <!-- Aba 3: Definir Banca -->
+        <div id="tab-banca" class="hidden">
+            <h3>Agendar Banca Examinadora</h3>
+            <div class="card">
+                <label>Selecione o TCC (Em Andamento):</label>
+                <select id="sel-banca-tcc"></select>
+
+                <label>Data da Apresentação:</label>
+                <input type="date" id="date-banca">
+
+                <label>Membros da Banca (Segure Ctrl para selecionar múltiplos):</label>
+                <select id="sel-banca-membros" multiple style="height: 120px;"></select>
+
+                <button id="btnDefinirBanca" class="btn-primary">Confirmar Agendamento</button>
+            </div>
+        </div>
+
+        <!-- Aba 4: Finalizar -->
+        <div id="tab-finalizar" class="hidden">
+            <h3>Avaliação Final e Encerramento</h3>
+            <div class="card">
+                <label>Selecione o TCC (Aguardando Banca):</label>
+                <select id="sel-final-tcc"></select>
+
+                <div id="area-avaliacao">
+                    <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 10px;">
+                        <div>
+                            <label>Nota Final (0-10):</label>
+                            <input type="number" id="nota-final" step="0.1" min="0" max="10">
+                        </div>
+                        <div>
+                            <label>Parecer Final:</label>
+                            <input type="text" id="parecer-final" placeholder="Aprovado com louvor...">
+                        </div>
+                    </div>
+                    <button id="btnFinalizarTcc" class="btn-danger" style="width: 100%; margin-top: 10px;">Finalizar e Gerar ATA</button>
+                </div>
+
+                <!-- BOTÃO DE DOWNLOAD ATA (PROFESSOR) -->
+                <div id="area-download-ata" class="hidden" style="text-align: center; margin-top: 20px; padding: 15px; background: #e8f8f5; border-radius: 6px;">
+                    <h3 style="color: var(--success-color);">✅ TCC Finalizado com Sucesso!</h3>
+                    <button id="btnBaixarAtaProf" class="btn-primary">📄 Baixar ATA de Defesa (PDF)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DOCUMENTAÇÃO TÉCNICA (Toggle) -->
+<span id="btnToggleDocs" class="doc-toggle">[+] Ver Documentação Técnica e Guia de Manutenção</span>
+<div id="tech-docs" class="hidden">Carregando documentação...</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- CONFIGURAÇÃO GLOBAL ---
+        const API = 'http://localhost:8080/api';
+        let user = null;
+        let docsLoaded = false;
+
+        // --- HELPERS DE EVENTOS ---
+        const bind = (id, event, fn) => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener(event, fn);
+        };
+
+        // --- BINDING GERAL ---
+        bind('btnLogin', 'click', fazerLogin);
+        bind('btnLogout', 'click', logout);
+        bind('btnToggleDocs', 'click', toggleDocs);
+
+        // --- BINDING ALUNO ---
+        bind('btnProporTcc', 'click', proporTcc);
+
+        // --- BINDING PROFESSOR (Abas) ---
+        bind('tab-btn-propostas', 'click', () => showTab('tab-propostas'));
+        bind('tab-btn-orientacao', 'click', () => showTab('tab-orientacao'));
+        bind('tab-btn-banca', 'click', () => showTab('tab-banca'));
+        bind('tab-btn-finalizar', 'click', () => showTab('tab-finalizar'));
+
+        // --- BINDING PROFESSOR (Ações) ---
+        bind('btnRegistrarOrientacao', 'click', registrarOrientacao);
+        bind('btnDefinirBanca', 'click', definirBanca);
+        bind('btnFinalizarTcc', 'click', finalizarTcc);
+
+        // --- BINDING DOWNLOAD PDF ---
+        // O ID do TCC é passado dinamicamente, então usamos closures
+        const btnAtaAluno = document.getElementById('btnBaixarAtaAluno');
+        const btnAtaProf = document.getElementById('btnBaixarAtaProf');
+
+        // --- FUNÇÕES ---
+
+        async function toggleDocs() {
+            const docsDiv = document.getElementById('tech-docs');
+            if (!docsLoaded) {
+                try {
+                    const response = await fetch('manual.txt'); // Busca arquivo estático
+                    if (response.ok) {
+                        docsDiv.textContent = await response.text();
+                        docsLoaded = true;
+                    } else {
+                        docsDiv.textContent = "Arquivo 'manual.txt' não encontrado em static.";
+                    }
+                } catch (e) { docsDiv.textContent = "Erro ao carregar documentação."; }
+            }
+            docsDiv.classList.toggle('hidden');
+        }
+
+        async function fazerLogin() {
+            const id = document.getElementById('loginId').value;
+            const pass = document.getElementById('loginPass').value;
+
+            if (!id || !pass) { alert('Preencha ID e Senha.'); return; }
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id, senha: pass})
+                });
+
+                if(!res.ok) throw new Error();
+
+                user = await res.json();
+                renderApp();
+            } catch(e) {
+                alert('Erro no login. Verifique suas credenciais.\nAluno: 2025001\nProf: 111222\nSenha: 123');
+            }
+        }
+
+        function logout() {
+            user = null;
+            location.reload();
+        }
+
+        function renderApp() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('main-view').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = `Olá, ${user.nome}`;
+            document.getElementById('user-role').innerText = `Perfil: ${user.papel}`;
+
+            if(user.papel === 'ALUNO') {
+                document.getElementById('aluno-panel').classList.remove('hidden');
+                loadAlunoData();
+            } else {
+                document.getElementById('prof-panel').classList.remove('hidden');
+                loadProfData();
+            }
+        }
+
+        // ================= LÓGICA DO ALUNO =================
+
+        async function loadAlunoData() {
+            const res = await fetch(`${API}/tcc/meu-tcc`, { headers: {'user-id': user.id}});
+            const text = await res.text();
+
+            if(!text) {
+                // Sem TCC
+                document.getElementById('aluno-no-tcc').classList.remove('hidden');
+                document.getElementById('aluno-tcc-info').classList.add('hidden');
+            } else {
+                // Com TCC
+                const tcc = JSON.parse(text);
+                document.getElementById('aluno-no-tcc').classList.add('hidden');
+                document.getElementById('aluno-tcc-info').classList.remove('hidden');
+
+                // Preenche campos
+                document.getElementById('viewTitulo').innerText = tcc.titulo;
+                document.getElementById('viewStatus').innerText = tcc.status;
+                document.getElementById('viewStatus').className = `status-badge status-${tcc.status}`;
+                document.getElementById('viewDesc').innerText = tcc.descricao;
+                document.getElementById('viewOrientador').innerText = tcc.orientador;
+
+                // Lista Orientações
+                const list = document.getElementById('viewOrientacoes');
+                list.innerHTML = '';
+                if(tcc.orientacoes && tcc.orientacoes.length > 0) {
+                    tcc.orientacoes.forEach(o => {
+                        const li = document.createElement('li');
+                        li.textContent = o;
+                        list.appendChild(li);
+                    });
+                } else {
+                    list.innerHTML = '<li style="color:#999">Nenhuma orientação registrada ainda.</li>';
+                }
+
+                // Banca
+                document.getElementById('viewDataBanca').innerText = tcc.dataBanca || "Não agendada";
+                document.getElementById('viewMembros').innerText = (tcc.bancaMembros && tcc.bancaMembros.length > 0)
+                    ? tcc.bancaMembros.join(', ') : "Não definida";
+
+                // Nota Final
+                const divFinal = document.getElementById('viewResultadoFinal');
+                if(tcc.status === 'FINALIZADO') {
+                    divFinal.classList.remove('hidden');
+                    document.getElementById('viewNota').innerText = tcc.nota;
+                    document.getElementById('viewParecer').innerText = tcc.parecer;
+
+                    // Configura botão de download
+                    btnAtaAluno.onclick = () => baixarAta(tcc.id);
+                } else {
+                    divFinal.classList.add('hidden');
+                }
+            }
+        }
+
+        async function proporTcc() {
+            const titulo = document.getElementById('tccTitulo').value;
+            const descricao = document.getElementById('tccDesc').value;
+
+            if(!titulo || !descricao) { alert('Preencha todos os campos.'); return; }
+
+            await fetch(`${API}/tcc/propor`, {
+                method: 'POST',
+                headers: {'user-id': user.id, 'Content-Type': 'application/json'},
+                body: JSON.stringify({titulo, descricao})
+            });
+            alert('Proposta enviada com sucesso!');
+            loadAlunoData();
+        }
+
+        // ================= LÓGICA DO PROFESSOR =================
+
+        function showTab(tabId) {
+            // Esconde todas
+            ['tab-propostas', 'tab-orientacao', 'tab-banca', 'tab-finalizar'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // Desativa botões
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Ativa atual
+            const btnId = 'tab-btn-' + tabId.split('-')[1];
+            const btn = document.getElementById(btnId);
+            if(btn) btn.classList.add('active');
+
+            document.getElementById(tabId).classList.remove('hidden');
+            loadProfData();
+        }
+
+        async function loadProfData() {
+            // 1. Carregar Propostas
+            const resProp = await fetch(`${API}/tcc/propostas`);
+            const propostas = await resProp.json();
+            const listDiv = document.getElementById('list-propostas');
+
+            listDiv.innerHTML = propostas.length ? '' : '<p style="padding:20px; text-align:center; color:#999">Nenhuma proposta pendente.</p>';
+
+            propostas.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <strong>${t.titulo}</strong><br>
+                            <small>Aluno: ${t.autor}</small>
+                        </div>
+                        <button class="btn-primary btn-aceitar" data-id="${t.id}">Aceitar</button>
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            });
+
+            // Event Delegation para botões dinâmicos
+            document.querySelectorAll('.btn-aceitar').forEach(btn => {
+                btn.addEventListener('click', (e) => aceitar(e.target.dataset.id));
+            });
+
+            // 2. Carregar Meus TCCs
+            const resMeus = await fetch(`${API}/tcc/meus-orientandos`, { headers: {'user-id': user.id}});
+            const meusTccs = await resMeus.json();
+
+            // Filtros para cada select
+            fillSelect('sel-orientacao-tcc', meusTccs, t => t.status === 'EM_ANDAMENTO');
+            fillSelect('sel-banca-tcc', meusTccs, t => t.status === 'EM_ANDAMENTO'); // Pode agendar se estiver em andamento
+            fillSelect('sel-final-tcc', meusTccs, t => t.status === 'AGUARDANDO_BANCA' || t.status === 'FINALIZADO');
+
+            // 3. Carregar Professores
+            const resProfs = await fetch(`${API}/tcc/professores`);
+            const profs = await resProfs.json();
+            const selProf = document.getElementById('sel-banca-membros');
+
+            // Só preenche se estiver vazio para não duplicar
+            if (selProf.options.length === 0) {
+                 profs.forEach(p => {
+                     // Não mostra o próprio professor logado na lista de membros
+                     if(p.id !== user.id) {
+                         const opt = document.createElement('option');
+                         opt.value = p.id;
+                         opt.textContent = p.nome;
+                         selProf.appendChild(opt);
+                     }
+                 });
+            }
+        }
+
+        function fillSelect(id, list, filterFn) {
+            const sel = document.getElementById(id);
+            const currentVal = sel.value; // Tenta preservar seleção
+
+            sel.innerHTML = '<option value="">Selecione...</option>';
+
+            list.filter(filterFn).forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = `${t.titulo} - ${t.autor} [${t.status}]`;
+                sel.appendChild(opt);
+            });
+
+            if(currentVal) sel.value = currentVal;
+        }
+
+        // Listener especial para a aba Finalizar: Se selecionar um já finalizado, mostra botão de download
+        document.getElementById('sel-final-tcc').addEventListener('change', (e) => {
+            const sel = e.target;
+            if(sel.value) {
+                const text = sel.options[sel.selectedIndex].text;
+                const areaAvaliacao = document.getElementById('area-avaliacao');
+                const areaDownload = document.getElementById('area-download-ata');
+
+                if(text.includes('FINALIZADO')) {
+                    areaAvaliacao.classList.add('hidden');
+                    areaDownload.classList.remove('hidden');
+                    btnAtaProf.onclick = () => baixarAta(sel.value);
+                } else {
+                    areaAvaliacao.classList.remove('hidden');
+                    areaDownload.classList.add('hidden');
+                }
+            }
+        });
+
+        // --- AÇÕES DO PROFESSOR ---
+
+        async function aceitar(idTcc) {
+            if(!confirm('Deseja assumir a orientação deste trabalho?')) return;
+            await fetch(`${API}/tcc/${idTcc}/orientar`, { method: 'POST', headers: {'user-id': user.id}});
+            loadProfData();
+        }
+
+        async function registrarOrientacao() {
+            const idTcc = document.getElementById('sel-orientacao-tcc').value;
+            const data = document.getElementById('date-orientacao').value;
+            const texto = document.getElementById('txt-orientacao').value;
+
+            if(!idTcc || !data || !texto) { alert('Preencha todos os campos.'); return; }
+
+            await fetch(`${API}/tcc/${idTcc}/orientacao`, {
+                method: 'POST',
+                headers: {'user-id': user.id, 'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: data, descricao: texto })
+            });
+
+            alert('Orientação registrada com sucesso!');
+            document.getElementById('txt-orientacao').value = '';
+            document.getElementById('date-orientacao').value = '';
+        }
+
+        async function definirBanca() {
+            const idTcc = document.getElementById('sel-banca-tcc').value;
+            const data = document.getElementById('date-banca').value;
+            const membros = Array.from(document.getElementById('sel-banca-membros').selectedOptions).map(o => o.value);
+
+            if(!idTcc || !data || membros.length === 0) {
+                alert('Selecione o TCC, a Data e pelo menos um Membro da banca.');
+                return;
+            }
+
+            await fetch(`${API}/tcc/${idTcc}/banca`, {
+                method: 'POST',
+                headers: {'user-id': user.id, 'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: data, membros: membros })
+            });
+            alert('Banca agendada com sucesso!');
+            // Reseta campos
+            document.getElementById('date-banca').value = '';
+            loadProfData();
+        }
+
+        async function finalizarTcc() {
+            const idTcc = document.getElementById('sel-final-tcc').value;
+            const nota = document.getElementById('nota-final').value;
+            const parecer = document.getElementById('parecer-final').value;
+
+            if(!idTcc || !nota || !parecer) { alert('Preencha todos os campos.'); return; }
+
+            await fetch(`${API}/tcc/${idTcc}/finalizar`, {
+                method: 'POST',
+                headers: {'user-id': user.id, 'Content-Type': 'application/json'},
+                body: JSON.stringify({ nota: nota, parecer: parecer })
+            });
+
+            alert('TCC Finalizado e ATA Gerada!');
+
+            // Muda a UI para modo download
+            document.getElementById('area-avaliacao').classList.add('hidden');
+            document.getElementById('area-download-ata').classList.remove('hidden');
+            btnAtaProf.onclick = () => baixarAta(idTcc);
+
+            loadProfData();
+        }
+
+        function baixarAta(idTcc) {
+            if(!idTcc) return;
+            // Abre o PDF em nova aba
+            window.open(`${API}/tcc/${idTcc}/ata`, '_blank');
+        }
+    });
+</script>
+</body>
+</html>
