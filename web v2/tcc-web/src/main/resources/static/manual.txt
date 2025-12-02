@@ -1,0 +1,83 @@
+============== MANUAL DE MANUTENÇÃO E ARQUITETURA - SISTEMA TCC (VERSÃO 6.0 WEB)
+
+CONCEITO E FILOSOFIA
+Este sistema foi projetado seguindo os princípios de Programação Orientada a
+Objetos Pura (inspirada em Alan Kay) adaptada para uma arquitetura Web RESTful.
+
+A ideia central é o "Rich Domain Model" (Modelo de Domínio Rico). Diferente de
+sistemas tradicionais onde a lógica fica em classes de "Serviço" e as entidades
+são apenas dados (getters/setters), aqui as Entidades de Domínio (Tcc, Aluno,
+Professor) SÃO INTELIGENTES e detêm as regras de negócio.
+
+ARQUITETURA DE PASTAS (Backend - Java Spring Boot)
+
+sistema_tcc.dominio:
+Contém as entidades JPA (@Entity). É o coração do sistema.
+Ex: A classe 'Tcc.java' tem métodos como 'aceitarOrientador()', 'agendarBanca()'.
+A regra de "só o orientador pode agendar banca" está DENTRO da classe Tcc.
+
+sistema_tcc.web:
+Contém os Controllers REST (@RestController). Eles são a "porta de entrada".
+Recebem JSON, carregam as entidades do banco, e delegam a ação para a entidade.
+Ex: TccController.java recebe o POST, carrega o Tcc e chama tcc.aceitarOrientador().
+
+sistema_tcc.repositorio:
+Interfaces Spring Data JPA. Apenas fazem a persistência. Não têm regras.
+
+sistema_tcc.dto:
+Objetos de Transferência de Dados (Records). Usados para enviar dados para o
+frontend sem expor a entidade completa do banco de dados (Pattern DTO).
+
+TECNOLOGIAS UTILIZADAS
+
+Backend: Java 17+, Spring Boot 3.2 (Web, Data JPA).
+
+Banco de Dados: H2 (Em memória) - recriado a cada reinício.
+
+Frontend: HTML5, CSS3, JavaScript puro (Vanilla JS). Single Page Application (SPA).
+
+GUIA DE MANUTENÇÃO DAS TELAS (Frontend)
+
+A interface é um arquivo único (index.html) que age como uma SPA.
+
+4.1. TELA DE LOGIN
+- Lógica: Função 'login()'. Envia POST para /api/auth/login.
+- Fluxo: Recebe um JSON com o papel do usuário (ALUNO ou PROFESSOR).
+Baseado nisso, exibe a 'div' correspondente (#aluno-panel ou #prof-panel).
+
+4.2. TELA DO ALUNO (#aluno-panel)
+- Estado 1 (Sem TCC): Mostra formulário para 'proporTcc()'.
+- Estado 2 (Com TCC): Mostra painel de leitura ('loadAlunoData()').
+- Manutenção: Para adicionar novos campos ao TCC, altere o HTML aqui e
+atualize o 'TccDTO' no Java e a função 'renderizarMeuTCC' no JS.
+
+4.3. TELA DO PROFESSOR (#prof-panel)
+- Navegação: Feita por Abas (Tabs). A função 'showTab()' alterna a visibilidade
+das divs (#tab-propostas, #tab-orientacao, etc).
+- Listas: As listas (Select/Combobox) são preenchidas dinamicamente pela
+função 'loadProfData()', que busca dados da API.
+- Manutenção: Se criar uma nova etapa no processo (ex: "Pré-Banca"), crie
+uma nova aba HTML, um novo botão na navegação e uma nova função JS.
+
+FLUXO DE DADOS (Exemplo: Registrar Orientação)
+
+Usuário preenche Data e Descrição no HTML.
+
+JS ('registrarOrientacao') pega os dados e envia POST para /api/tcc/{id}/orientacao.
+
+Java 'TccController' recebe, formata a data e carrega o objeto 'Tcc' do banco.
+
+'TccController' chama 'tcc.receberOrientacao(professor, texto)'.
+
+A classe 'Tcc' valida se o professor é o orientador e adiciona o texto à lista.
+
+'TccController' salva o estado atualizado no banco.
+
+DICAS PARA O DESENVOLVEDOR
+
+Não adicione lógica de negócio no JavaScript ou nos Controllers. A lógica deve
+ficar nas classes do pacote 'dominio'.
+
+O banco H2 é volátil. Se parar o servidor, os dados somem.
+
+Para mudar a aparência, edite a seção <style> no topo deste arquivo.

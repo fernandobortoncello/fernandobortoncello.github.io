@@ -1,0 +1,165 @@
+================================================================================
+SISTEMA TCC WEB (VERSÃO 6.0) - MANUAL TÉCNICO
+
+VISÃO GERAL DO PROJETO
+
+O Sistema para Organização de Trabalho de Conclusão de Curso (TCC) foi
+desenvolvido para auxiliar alunos e professores do Instituto Federal de
+Santa Catarina (Câmpus Garopaba) no fluxo completo do TCC, desde a proposta
+do tema até a defesa e avaliação final.
+
+Esta versão (6.0) é uma aplicação WEB baseada em Spring Boot, mas com uma
+arquitetura diferenciada focada em PROGRAMAÇÃO ORIENTADA A OBJETOS PURA
+(Rich Domain Model), evitando o padrão anêmico comum de mercado.
+
+ARQUITETURA E FILOSOFIA (POO PURA / ALAN KAY)
+
+A arquitetura foge do padrão "Controller -> Service -> Repository". Aqui,
+os objetos são "seres vivos" inteligentes.
+
+a) OBJETOS RICOS (Rich Domain Model):
+
+As classes de domínio ('Tcc', 'Aluno', 'Professor') contêm DADOS e
+COMPORTAMENTO.
+
+Exemplo: Não existe 'TccService.aceitarOrientador(tcc, prof)'.
+Existe 'tcc.aceitarOrientador(prof)'. O próprio objeto TCC sabe suas
+regras e valida se pode aceitar um orientador naquele momento.
+
+b) ENCAPSULAMENTO FORTE:
+
+Setters públicos são evitados. O estado do objeto só muda através de
+métodos de negócio significativos (ex: 'receberNotaFinal' em vez de 'setNota').
+
+c) CAMADAS DO SISTEMA:
+
+sistema_tcc.dominio: O coração. Entidades JPA inteligentes.
+
+sistema_tcc.web: A interface. Controllers REST que recebem JSON e delegam
+ação para as entidades.
+
+sistema_tcc.repositorio: A persistência. Interfaces Spring Data JPA.
+
+sistema_tcc.dto: A transferência. Objetos imutáveis (Records) para
+comunicação com o frontend.
+
+REGRAS DE NEGÓCIO (RN) E REQUISITOS FUNCIONAIS (RF) ATENDIDOS
+
+O sistema implementa os seguintes requisitos extraídos do documento oficial:
+
+[RF001] Login:
+
+Autenticação via ID e Senha.
+
+Implementado em 'AuthController'. O sistema identifica se é Aluno ou Professor.
+
+[RF002, RF003] Cadastro de Tema (Proposta):
+
+Aluno submete Título e Descrição.
+
+O status inicial é 'PROPOSTA'.
+
+Implementação: 'Aluno.criarProposta(...)'.
+
+[RF004, RF005] Escolha de Orientador:
+
+Professor visualiza propostas e "assume" a orientação.
+
+Regra: TCC muda de 'PROPOSTA' para 'EM_ANDAMENTO'.
+
+Implementação: 'Tcc.aceitarOrientador(...)'.
+
+[RF009, RF010] Controle de Orientação:
+
+Professor registra progressos (Data + Descrição).
+
+Regra: Apenas o orientador do TCC pode registrar.
+
+Implementação: 'Tcc.receberOrientacao(...)'.
+
+[RF012, RF013] Escolha da Banca:
+
+Professor define Data e Membros da banca.
+
+Regra: TCC deve estar 'EM_ANDAMENTO'. Após agendar, muda para 'AGUARDANDO_BANCA'.
+
+Implementação: 'Tcc.agendarBanca(...)'.
+
+[RF017, RF019, RF020] Finalização e Avaliação:
+
+Professor lança Nota Final e Parecer (ATA).
+
+Regra: TCC deve estar 'AGUARDANDO_BANCA'. Após lançar, muda para 'FINALIZADO'.
+
+Implementação: 'Tcc.receberNotaFinal(...)'.
+
+REQUISITOS NÃO-FUNCIONAIS (RNF) IMPLEMENTADOS
+
+[RNF-MAN01] O sistema deve ser orientado a objetos:
+Atendido via arquitetura de Domínio Rico.
+
+[RNF-USA01] Responsividade e Compatibilidade Web:
+Atendido pelo Frontend (index.html) que utiliza design responsivo.
+
+[RNF-SEG02] Controle de Acesso (Papéis):
+O sistema distingue ALUNO de PROFESSOR e bloqueia ações indevidas (ex: Aluno
+não pode lançar nota). Isso é validado tanto no Frontend quanto no Backend.
+
+[RNF-SEG04] Isolamento de Dados:
+Aluno só vê seu próprio TCC. Professor vê seus orientandos.
+
+CONCEITOS DE POO UTILIZADOS
+
+HERANÇA:
+Classe 'Usuario' é pai de 'Aluno' e 'Professor'.
+Uso: Polimorfismo no login e repositório único de usuários.
+
+POLIMORFISMO:
+O método 'autenticar' é comum, mas o comportamento de cada usuário no sistema
+é diferente.
+
+ENCAPSULAMENTO:
+Atributos são privados. Listas (como 'orientacoes') são protegidas e só
+alteradas por métodos específicos de negócio.
+
+ASSOCIAÇÃO E AGREGAÇÃO:
+Um 'Tcc' tem um 'Aluno' (Autor) e um 'Professor' (Orientador).
+Uma 'Banca' é uma agregação de vários 'Professores'.
+
+GUIA DE INSTALAÇÃO E EXECUÇÃO
+
+Tecnologias: Java 21, Maven, Spring Boot 3.2, H2 Database.
+
+Importar o projeto:
+Abra a pasta 'tcc-web' na sua IDE (IntelliJ ou Eclipse) como "Projeto Maven".
+
+Executar:
+Rode a classe principal 'sistema_tcc.TccApplication'.
+O servidor iniciará na porta 8080.
+
+Acessar:
+
+Aplicação: http://localhost:8080
+
+Console do Banco H2: http://localhost:8080/h2-console
+
+Credenciais de Teste (Pré-carregadas):
+
+Aluno: ID "2025001", Senha "123"
+
+Professor: ID "111222", Senha "123"
+
+DICAS DE MANUTENÇÃO
+
+O Frontend é um SPA (Single Page Application) contido inteiramente em
+'src/main/resources/static/index.html'. Não requer build de JS (npm/node).
+
+O Banco de Dados é recriado a cada execução (H2 em memória).
+
+Para adicionar novos campos, altere a Entidade no pacote 'dominio' e o DTO
+correspondente.
+
+================================================================================
+Autor do Documento: Equipe de Desenvolvimento
+Data: 29/09/2025
+Versão do Sistema: 6.0.0-SNAPSHOT
